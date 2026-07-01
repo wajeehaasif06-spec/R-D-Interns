@@ -203,7 +203,15 @@ plots/
 ```
 
 ---
+## Generated Plots
 
+### Waveform
+
+![Waveform](plots/waveform.png)
+
+### Frequency Spectrum
+
+![Frequency Spectrum](plots/frequency_spectrum.png)
 ## Technologies Used
 
 - Python
