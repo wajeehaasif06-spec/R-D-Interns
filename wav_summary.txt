@@ -1,0 +1,9 @@
+--- WAV summary: audio/test_clip.wav ---
+Sample rate     : 8000 Hz
+Bit depth       : 16-bit
+Channels        : 1
+Total frames    : 67513
+Duration        : 8.439 s
+Bitrate (PCM)   : 128000 bps
+Nyquist freq    : 4000.0 Hz
+Saved plot to wav_analysis.png
