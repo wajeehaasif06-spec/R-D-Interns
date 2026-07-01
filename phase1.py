@@ -16,6 +16,10 @@ os.makedirs("plots", exist_ok=True)
 
 data_float = data.astype(np.float32)
 time = np.linspace(0, len(data_float)/sample_rate, len(data_float))
+# DC Offset Removal
+dc_offset = np.mean(data_float)
+data_dc = data_float - dc_offset
+print(f"DC Offset removed: {dc_offset:.4f}")
 
 # Waveform
 plt.figure(figsize=(12, 4))
