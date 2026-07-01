@@ -1,231 +1,297 @@
-# Phase 0 – WAV Audio Analysis
+# Phase 1 - Audio Processing using Python and Codec2
 
-## Overview
+## Project Overview
 
-This project was completed as part of the **R&D Internship – Phase 0**. The objective was to build a Python program that reads a WAV audio file, extracts its metadata, and performs basic audio signal analysis. The program also visualizes the audio signal in both the **time domain** and the **frequency domain** using waveform and Fast Fourier Transform (FFT) plots.
-
----
-
-## What I Did
-
-During this task, I:
-
-- Read a WAV audio file using the `soundfile` library.
-- Extracted and displayed important audio metadata, including:
-  - Sample Rate
-  - Bit Depth
-  - Number of Channels
-  - Data Type
-  - Duration
-- Generated a waveform to visualize the audio signal over time.
-- Performed a Fast Fourier Transform (FFT) to analyze the frequency components of the audio.
-- Saved both graphs inside the `plots/` directory.
-- Used Git for version control by creating a dedicated branch, making meaningful commits, and pushing the changes to GitHub.
+This project demonstrates a complete Digital Signal Processing (DSP) workflow on a WAV audio file. The objective is to analyze the audio, remove the DC offset, reduce background noise, normalize the signal, encode it using Codec2, decode it back to WAV format, and evaluate the results.
 
 ---
 
-## What I Learned
+# Objectives
 
-This task helped me understand several fundamental concepts of digital signal processing and software development, including:
+The objectives of this project are:
 
-- The structure and properties of WAV audio files.
-- The meaning and importance of sample rate and bit depth.
-- The difference between mono and stereo audio.
-- How a waveform represents an audio signal in the time domain.
-- How the Fast Fourier Transform (FFT) converts a signal from the time domain to the frequency domain.
-- Why only the positive frequencies are plotted after performing FFT.
-- Basic visualization of audio signals using Matplotlib.
-- Using Git branches, commits, and GitHub for version control and collaboration.
-
----
-
-## How the Graphs Were Plotted
-
-### Waveform
-
-The waveform was created by generating a time axis using the sample rate and plotting the audio sample amplitudes against time using Matplotlib.
-
-```python
-time = np.arange(len(audio_data)) / sample_rate
-plt.plot(time, audio_data)
-```
-
-This produces a graph showing how the amplitude of the audio changes throughout the recording.
-
-### Frequency Spectrum (FFT)
-
-The frequency spectrum was generated using NumPy's Fast Fourier Transform (FFT).
-
-```python
-fft_result = np.fft.fft(audio_data)
-frequencies = np.fft.fftfreq(len(audio_data), d=1/sample_rate)
-```
-
-The magnitude of the positive frequency components was then plotted using Matplotlib.
+- Read and analyze a WAV audio file.
+- Display important audio metadata.
+- Remove the DC offset.
+- Reduce background noise.
+- Normalize the processed audio.
+- Encode the processed audio using Codec2.
+- Decode the Codec2 bitstream back to WAV.
+- Compare the processed and decoded audio.
+- Generate waveform and frequency spectrum plots.
 
 ---
 
-## Graph Explanation
+# Technologies Used
 
-### 1. Waveform
-
-The waveform is a **time-domain representation** of the audio signal.
-
-- **X-axis:** Time (seconds)
-- **Y-axis:** Amplitude
-
-#### Key Insights
-
-- Shows how the audio signal changes over time.
-- Identifies louder and quieter portions of the recording.
-- Helps visualize pauses, peaks, and overall signal behavior.
+- Python 3.x
+- NumPy
+- SoundFile
+- Matplotlib
+- NoiseReduce
+- Codec2
+- WSL (Ubuntu)
 
 ---
 
-### 2. Frequency Spectrum
-
-The frequency spectrum is a **frequency-domain representation** of the audio signal obtained using FFT.
-
-- **X-axis:** Frequency (Hz)
-- **Y-axis:** Magnitude
-
-#### Key Insights
-
-- Shows which frequencies are present in the audio.
-- Identifies dominant frequency components.
-- Helps understand the frequency distribution of the signal.
-- Commonly used in speech processing, audio analysis, filtering, and signal processing applications.
-
----
-
-## Project Structure
+# Audio Processing Pipeline
 
 ```
-R-D-Interns/
-│
-├── audio_analysis.py
-├── loud.wav
-├── requirements.txt
-├── README.md
-└── plots/
-    ├── waveform.png
-    └── frequency_spectrum.png
+Input Audio
+      │
+      ▼
+Read WAV File
+      │
+      ▼
+Audio Analysis
+      │
+      ▼
+Remove DC Offset
+      │
+      ▼
+Noise Reduction
+      │
+      ▼
+Normalization
+      │
+      ▼
+Codec2 Encoding
+      │
+      ▼
+Codec2 Decoding
+      │
+      ▼
+Evaluation
 ```
 
 ---
 
-## Prerequisites
+# Processing Steps
+
+## 1. Audio Analysis
+
+The script reads the WAV file and extracts:
+
+- Sample Rate
+- Number of Channels
+- Audio Duration
+- Data Type
+- Bit Depth
+
+This information provides an overview of the audio before processing.
+
+---
+
+## 2. DC Offset Removal
+
+The DC offset is calculated as the mean of all audio samples.
+
+The offset is removed by subtracting the mean value from every sample.
+
+After removal, the new DC offset becomes approximately zero, confirming that the waveform is centered.
+
+---
+
+## 3. Noise Reduction
+
+Background noise is reduced using the **NoiseReduce** library.
+
+The algorithm performs spectral noise suppression, reducing unwanted noise while preserving the speech signal.
+
+---
+
+## 4. Audio Normalization
+
+The processed audio is normalized by dividing every sample by the maximum absolute amplitude.
+
+Normalization increases the loudness while preventing clipping.
+
+---
+
+## 5. Codec2 Encoding
+
+The normalized audio is converted into RAW PCM format and encoded using Codec2 in **3200 bps** mode.
+
+Codec2 compresses speech efficiently for low-bandwidth communication systems.
+
+---
+
+## 6. Codec2 Decoding
+
+The encoded Codec2 file is decoded back into RAW audio and converted into a WAV file.
+
+The decoded audio is compared with the processed audio to evaluate Codec2 performance.
+
+---
+
+# Generated Files
+
+The script produces:
+
+### Audio Files
+
+- audio_no_dc.wav
+- audio_noise_reduced.wav
+- audio_normalized.wav
+- audio.codec2
+- audio_decoded.wav
+
+### Graphs
+
+- original_waveform.png
+- original_spectrum.png
+- noise_reduced_waveform.png
+- noise_reduced_spectrum.png
+- normalized_waveform.png
+- normalized_spectrum.png
+- decoded_waveform.png
+- decoded_spectrum.png
+
+---
+
+# Graph Explanation
+
+## Waveform
+
+The waveform displays audio amplitude over time.
+
+It helps visualize:
+
+- DC offset
+- Signal amplitude
+- Changes after processing
+
+---
+
+## Frequency Spectrum
+
+The frequency spectrum is generated using the Fast Fourier Transform (FFT).
+
+It shows the frequency components of the signal and helps visualize how processing affects the spectral content.
+
+---
+
+# Evaluation
+
+The following observations were made:
+
+- The DC offset was successfully removed.
+- Background noise was reduced.
+- The normalized audio had consistent amplitude.
+- Codec2 successfully encoded and decoded the processed audio.
+- The decoded audio sounded very similar to the normalized audio, indicating that Codec2 preserved speech quality while compressing the signal.
+
+---
+
+# Prerequisites
+
+Before running the project, install:
 
 - Python 3.x
 - Git
-- Virtual Environment (recommended)
+- WSL (Ubuntu)
+- Codec2
 
-### Required Python Libraries
+Create and activate a virtual environment.
 
-- NumPy
-- Matplotlib
-- SoundFile
-- SciPy
-
-Install all dependencies using:
-
-```bash
-pip install -r requirements.txt
-```
-
-or
-
-```bash
-pip install numpy matplotlib soundfile scipy
-```
+Install the required Python libraries.
 
 ---
 
-## How to Run the Project
+# Installation
 
-### 1. Clone the repository
+Clone the repository:
 
 ```bash
 git clone <repository-url>
-```
-
-### 2. Navigate to the project folder
-
-```bash
 cd R-D-Interns
 ```
 
-### 3. (Optional) Create and activate a virtual environment
-
-Linux / WSL
+Create a virtual environment:
 
 ```bash
 python3 -m venv .venv
+```
+
+Activate it:
+
+```bash
 source .venv/bin/activate
 ```
 
-Windows
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-### 4. Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Ensure the WAV file (`loud.wav`) is present in the project directory.
-
-### 6. Run the script
+Install Codec2 (Ubuntu):
 
 ```bash
-python audio_analysis.py
+sudo apt update
+sudo apt install codec2
 ```
 
 ---
 
-## Output
+# Run the Project
 
-Running the script will:
-
-- Display audio metadata in the terminal.
-- Generate the waveform plot.
-- Generate the frequency spectrum plot.
-- Save both graphs inside the `plots/` folder as:
-
-```
-plots/
-├── waveform.png
-└── frequency_spectrum.png
+```bash
+python audio_processing.py
 ```
 
 ---
-## Generated Plots
 
-### Waveform
+# Output
 
-![Waveform](plots/waveform.png)
-
-### Frequency Spectrum
-
-![Frequency Spectrum](plots/frequency_spectrum.png)
-## Technologies Used
-
-- Python
-- NumPy
-- SoundFile
-- Matplotlib
-- SciPy
-- Git
-- GitHub
+All processed audio files and graphs are saved inside the **output/** directory.
 
 ---
 
-## Author
+# Learning Outcomes
 
-**Bashair Talib**
+Through this project, I learned:
 
-R&D Internship – Phase 0
+- Reading WAV files in Python.
+- Audio metadata analysis.
+- Digital Signal Processing fundamentals.
+- DC offset removal.
+- Noise suppression techniques.
+- Audio normalization.
+- Fast Fourier Transform (FFT).
+- Codec2 speech compression.
+- Audio encoding and decoding.
+- Audio evaluation using waveform and spectrum analysis.
+## Output Graphs
+
+### Original Waveform
+
+![Original Waveform](output/original_waveform.png)
+
+### Original Spectrum
+
+![Original Spectrum](output/original_spectrum.png)
+
+### Noise Reduced Waveform
+
+![Noise Reduced Waveform](output/noise_reduced_waveform.png)
+
+### Noise Reduced Spectrum
+
+![Noise Reduced Spectrum](output/noise_reduced_spectrum.png)
+
+### Normalized Waveform
+
+![Normalized Waveform](output/normalized_waveform.png)
+
+### Normalized Spectrum
+
+![Normalized Spectrum](output/normalized_spectrum.png)
+
+### Decoded Waveform
+
+![Decoded Waveform](output/decoded_waveform.png)
+
+### Decoded Spectrum
+
+![Decoded Spectrum](output/decoded_spectrum.png)

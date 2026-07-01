@@ -1,14 +1,15 @@
-# Virtual Environment
-.venv/
-venv/
-
 # Python cache
 __pycache__/
-*.py[cod]
+*.pyc
+
+# Virtual Environment
+.venv/
 
 # VS Code
 .vscode/
 
-# Operating System Files
+# macOS
 .DS_Store
-Thumbs.db
+
+# Temporary files
+*.tmp
