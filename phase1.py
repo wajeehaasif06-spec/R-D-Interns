@@ -21,6 +21,17 @@ dc_offset = np.mean(data_float)
 data_dc = data_float - dc_offset
 print(f"DC Offset removed: {dc_offset:.4f}")
 
+# FIR Bandpass Filter (300-3400 Hz speech band)
+from scipy.signal import firwin, lfilter
+
+nyq = sample_rate / 2
+low  = 300  / nyq
+high = 3400 / nyq
+
+fir_coeff = firwin(101, [low, high], pass_zero=False, window='hamming')
+data_filtered = lfilter(fir_coeff, 1.0, data_dc)
+print("FIR bandpass filter applied (300-3400 Hz)")
+
 # Waveform
 plt.figure(figsize=(12, 4))
 plt.plot(time, data_float, color='steelblue', linewidth=0.5)
