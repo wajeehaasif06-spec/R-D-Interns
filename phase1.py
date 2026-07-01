@@ -149,3 +149,40 @@ print("Decoding done!")
 decoded_data = np.frombuffer(open(raw_decoded, 'rb').read(), dtype=np.int16)
 wavfile.write(output_wav, sample_rate, decoded_data)
 print(f"Output WAV saved: {output_wav}")
+
+# ============================================================
+# STEP 8: Compression Ratio
+# ============================================================
+original_size = os.path.getsize(raw_input)
+encoded_size  = os.path.getsize(raw_encoded)
+compression_ratio = original_size / encoded_size
+
+print("\n" + "=" * 50)
+print("RESULTS")
+print("=" * 50)
+print(f"Original raw size : {original_size} bytes")
+print(f"Encoded size      : {encoded_size} bytes")
+print(f"Compression Ratio : {compression_ratio:.2f}:1")
+
+# ============================================================
+# STEP 9: SNR Calculation
+# ============================================================
+min_len = min(len(data_gained), len(decoded_data))
+original_seg = data_gained[:min_len].astype(np.float32)
+decoded_seg  = decoded_data[:min_len].astype(np.float32)
+
+signal_power = np.mean(original_seg ** 2)
+noise_power  = np.mean((original_seg - decoded_seg) ** 2)
+snr_db = 10 * np.log10(signal_power / (noise_power + 1e-10))
+
+print(f"SNR               : {snr_db:.2f} dB")
+
+# SNR bar chart
+plt.figure(figsize=(6, 4))
+plt.bar(["SNR (processed vs decoded)"], [snr_db], color='teal')
+plt.ylabel("dB")
+plt.title(f"SNR after Codec2: {snr_db:.2f} dB")
+plt.grid(True, axis='y')
+plt.savefig("plots/snr_chart.png", dpi=150)
+plt.close()
+print("SNR chart saved!")
