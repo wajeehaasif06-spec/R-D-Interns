@@ -17,3 +17,4 @@ plots/*.png
 
 # Ignore local test audio if desired
 loud.wav
+noisy__Audio.wav
