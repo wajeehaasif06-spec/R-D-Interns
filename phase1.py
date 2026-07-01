@@ -118,3 +118,34 @@ plt.savefig("plots/before_after_comparison.png", dpi=150)
 plt.close()
 
 print("All plots saved in plots/ folder!")
+
+# ============================================================
+# STEP 7: Codec2 Encode → Decode
+# ============================================================
+import subprocess
+
+os.makedirs("codec", exist_ok=True)
+
+raw_input   = "codec/processed.raw"
+raw_encoded = "codec/encoded.c2"
+raw_decoded = "codec/decoded.raw"
+output_wav  = "processed_audio/output_decoded.wav"
+
+# Save processed audio as raw 16-bit PCM (Codec2 needs raw, not WAV)
+data_gained.tofile(raw_input)
+print("Raw PCM file saved!")
+
+# Encode with Codec2 at 3200 bps
+print("Encoding with Codec2...")
+subprocess.run(["c2enc", "3200", raw_input, raw_encoded], check=True)
+print("Encoding done!")
+
+# Decode back
+print("Decoding with Codec2...")
+subprocess.run(["c2dec", "3200", raw_encoded, raw_decoded], check=True)
+print("Decoding done!")
+
+# Read decoded raw PCM and save as WAV
+decoded_data = np.frombuffer(open(raw_decoded, 'rb').read(), dtype=np.int16)
+wavfile.write(output_wav, sample_rate, decoded_data)
+print(f"Output WAV saved: {output_wav}")
