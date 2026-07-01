@@ -32,6 +32,17 @@ fir_coeff = firwin(101, [low, high], pass_zero=False, window='hamming')
 data_filtered = lfilter(fir_coeff, 1.0, data_dc)
 print("FIR bandpass filter applied (300-3400 Hz)")
 
+# Gain Normalization
+max_val = np.max(np.abs(data_filtered))
+gain_factor = (0.9 * 32767) / max_val
+data_gained = np.clip(data_filtered * gain_factor, -32768, 32767).astype(np.int16)
+print(f"Gain factor applied: {gain_factor:.4f}")
+
+# Save processed WAV
+import os
+os.makedirs("processed_audio", exist_ok=True)
+wavfile.write("processed_audio/processed.wav", sample_rate, data_gained)
+print("Processed WAV saved!")
 # Waveform
 plt.figure(figsize=(12, 4))
 plt.plot(time, data_float, color='steelblue', linewidth=0.5)
