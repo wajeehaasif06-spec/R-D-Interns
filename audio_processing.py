@@ -104,6 +104,20 @@ sf.write(
 )
 
 print("Normalized audio saved.")
+
+# ----------------------------------------
+# Calculate Signal-to-Noise Ratio (SNR)
+# ----------------------------------------
+
+signal_power = np.mean(normalized_audio ** 2)
+
+noise = audio_data - normalized_audio
+
+noise_power = np.mean(noise ** 2)
+
+snr = 10 * np.log10(signal_power / noise_power)
+
+print(f"SNR : {snr:.2f} dB")
 # ----------------------------------------
 # Convert WAV to RAW PCM
 # ----------------------------------------

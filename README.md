@@ -181,6 +181,16 @@ The following observations were made:
 - Codec2 successfully encoded and decoded the processed audio.
 - The decoded audio sounded very similar to the normalized audio, indicating that Codec2 preserved speech quality while compressing the signal.
 
+# Signal-to-Noise Ratio (SNR)
+
+The Signal-to-Noise Ratio (SNR) was calculated to quantitatively evaluate the quality of the processed audio.
+
+SNR compares the power of the useful speech signal with the power of the remaining noise.
+
+A higher SNR value indicates better audio quality and more effective noise reduction.
+
+**Calculated SNR:** XX.XX dB
+
 ---
 
 # Prerequisites
