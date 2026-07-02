@@ -186,3 +186,16 @@ plt.grid(True, axis='y')
 plt.savefig("plots/snr_chart.png", dpi=150)
 plt.close()
 print("SNR chart saved!")
+
+# decoded waveform
+decoded_time = np.linspace(0, len(decoded_data)/sample_rate, len(decoded_data))
+
+plt.figure(figsize=(12,4))
+plt.plot(decoded_time, decoded_data, linewidth=0.5)
+plt.title("Decoded Waveform")
+plt.xlabel("Time (s)")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.savefig("plots/decoded_waveform.png", dpi=150)
+plt.close()
+
