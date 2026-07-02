@@ -199,3 +199,17 @@ plt.grid(True)
 plt.savefig("plots/decoded_waveform.png", dpi=150)
 plt.close()
 
+#decoded spectrum
+Nd = len(decoded_data)
+
+yf_dec = np.fft.fft(decoded_data)
+xf_dec = np.fft.fftfreq(Nd, 1/sample_rate)
+
+plt.figure(figsize=(12,4))
+plt.plot(xf_dec[:Nd//2], np.abs(yf_dec[:Nd//2]), linewidth=0.5)
+plt.title("Decoded Frequency Spectrum")
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Magnitude")
+plt.grid(True)
+plt.savefig("plots/decoded_spectrum.png", dpi=150)
+plt.close()
