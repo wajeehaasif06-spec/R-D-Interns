@@ -213,3 +213,21 @@ plt.ylabel("Magnitude")
 plt.grid(True)
 plt.savefig("plots/decoded_spectrum.png", dpi=150)
 plt.close()
+
+#error signal plot
+error = original_seg - decoded_seg
+
+error_time = np.linspace(
+    0,
+    len(error)/sample_rate,
+    len(error)
+)
+
+plt.figure(figsize=(12,4))
+plt.plot(error_time, error, linewidth=0.5)
+plt.title("Error Signal (Original - Decoded)")
+plt.xlabel("Time (s)")
+plt.ylabel("Error")
+plt.grid(True)
+plt.savefig("plots/error_signal.png", dpi=150)
+plt.close()
