@@ -9,12 +9,6 @@ __pycache__/
 codec/*.raw
 codec/*.c2
 
-# Ignore generated processed audio
-processed_audio/*.wav
-
-# Ignore generated plots
-plots/*.png
-
 # Ignore local test audio if desired
 loud.wav
 noisy__Audio.wav
