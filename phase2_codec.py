@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
-import subprocess
 import os
+import pycodec2
+from scipy.signal import butter, lfilter
+
 
 print("="*50)
 print("PHASE 2: BUFFERED REAL-TIME CODEC2")
@@ -12,18 +14,12 @@ print("="*50)
 # PARAMETERS
 # =====================================================
 
-FRAME_DURATION = 0.02        # 20 ms
-FRAME_SIZE = 160             # 160 samples @ 8 kHz
 
 # =====================================================
 # PATHS
 # =====================================================
 
 input_wav = "recordings/codec_input.wav"
-
-raw_input = "codec/codec_input.raw"
-encoded = "codec/encoded.c2"
-decoded_raw = "codec/decoded.raw"
 decoded_wav = "recordings/decoded_realtime.wav"
 
 os.makedirs("codec", exist_ok=True)
@@ -33,7 +29,51 @@ os.makedirs("analysis", exist_ok=True)
 # LOAD INPUT AUDIO
 # =====================================================
 
+
 sample_rate, data = wavfile.read(input_wav)
+
+codec = pycodec2.Codec2(3200)
+FRAME_SIZE = codec.samples_per_frame()
+FRAME_DURATION = FRAME_SIZE/sample_rate
+print(f"Frame size: {FRAME_SIZE}")
+
+print("\nPreprocessing audio...")
+data = data.astype(np.float64)
+
+# remove DC offset
+data = data - np.mean(data)
+
+# bandpass filter
+low = 250/(sample_rate/2)
+high = 3200/(sample_rate/2)
+
+FILTER_ORDER = 2 
+
+b, a = butter(
+    FILTER_ORDER,
+    [low, high],
+    btype='band'
+)
+
+data = lfilter(
+    b,
+    a,
+    data
+)
+
+# normalize
+peak = np.percentile(np.abs(data), 99)
+if peak > 0:
+    data = data / peak
+
+GAIN = 0.65
+
+data = data * GAIN
+data = np.clip(data, -0.95, 0.95)
+data = (data * 32767).astype(np.int16)
+
+
+print("Preprocessing complete")
 
 print(f"Sample Rate : {sample_rate} Hz")
 print(f"Total Samples : {len(data)}")
@@ -44,14 +84,10 @@ print(f"Total Samples : {len(data)}")
 
 print("\nCreating 20 ms buffers...")
 
-frames = []
-
-for i in range(0, len(data), FRAME_SIZE):
-
-    frame = data[i:i+FRAME_SIZE]
-
-    if len(frame) == FRAME_SIZE:
-        frames.append(frame)
+frames = [
+    data[i:i+FRAME_SIZE]
+    for i in range(0, len(data)-FRAME_SIZE+1, FRAME_SIZE)
+]
 
 print(f"Frame duration : {FRAME_DURATION*1000:.0f} ms")
 print(f"Frame size     : {FRAME_SIZE} samples")
@@ -60,48 +96,36 @@ print(f"Total frames   : {len(frames)}")
 # =====================================================
 # CODEC2 PROCESSING (WHOLE STREAM)
 # =====================================================
+print("\nEncoding using pycodec2...")
 
-print("\nProcessing complete audio stream through Codec2...")
 
-# save entire audio as raw PCM
-data.astype(np.int16).tofile(raw_input)
 
-print("Raw PCM created")
+encoded_frames = []
 
-# encode
-print("Encoding with Codec2...")
+for frame in frames:
 
-subprocess.run(
-    [
-        "c2enc",
-        "3200",
-        raw_input,
-        encoded,
-        "--natural"
-    ],
-    check=True
+    encoded = codec.encode(frame)
+
+    encoded_frames.append(encoded)
+
+
+print(
+    f"Frames encoded: "
+    f"{len(encoded_frames)}"
 )
 
-print("Encoding complete")
+print("\nDecoding...")
 
-# decode
-print("Decoding with Codec2...")
+decoded = []
 
-subprocess.run(
-    [
-        "c2dec",
-        "3200",
-        encoded,
-        decoded_raw
-    ],
-    check=True
-)
+for frame in encoded_frames:
 
-print("Decoding complete")
+    decoded_frame = codec.decode(frame)
 
-# reconstruct audio
-decoded = np.fromfile(
-    decoded_raw,
+    decoded.extend(decoded_frame)
+
+decoded = np.array(
+    decoded,
     dtype=np.int16
 )
 
@@ -112,14 +136,17 @@ wavfile.write(
 )
 
 print("Decoded WAV saved")
+
 # =====================================================
 # COMPRESSION RATIO
 # =====================================================
 
 original_size = len(data)*2
 
-encoded_size = os.path.getsize(
-    encoded
+encoded_size = (
+    len(encoded_frames)
+    * codec.bits_per_frame()
+    / 8
 )
 
 compression_ratio = (
@@ -129,7 +156,10 @@ compression_ratio = (
 print("\nCompression Results")
 print("-------------------")
 print(f"Original size : {original_size} bytes")
-print(f"Encoded frame : {encoded_size} bytes")
+print(
+    f"Encoded size : "
+    f"{encoded_size:.0f} bytes"
+)
 print(f"Compression ratio : {compression_ratio:.2f}:1")
 
 # =====================================================
@@ -158,6 +188,8 @@ snr = 10*np.log10(
 )
 
 print(f"SNR : {snr:.2f} dB")
+print(f"Codec bitrate : 3200 bps")
+print(f"Buffer latency : {FRAME_DURATION*1000:.0f} ms")
 
 # =====================================================
 # DECODED WAVEFORM

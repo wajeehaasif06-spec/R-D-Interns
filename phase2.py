@@ -1,7 +1,7 @@
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
-from scipy.signal import resample
+from scipy.signal import resample_poly
 from pathlib import Path
 import subprocess
 import os
@@ -62,17 +62,15 @@ print("Saved original recording")
 # CONVERT TO 8 kHz
 # ==================================================
 audio_float = audio.astype(np.float32)
+audio_float = audio_float.squeeze()
 
-new_samples = int(
-    len(audio_float)
-    * CODEC_RATE
-    / INPUT_RATE
-)
 
-audio_8k = resample(
+audio_8k = resample_poly(
     audio_float,
-    new_samples
+    CODEC_RATE,
+    INPUT_RATE
 )
+
 
 audio_8k = np.clip(
     audio_8k,
@@ -143,18 +141,15 @@ decoded_audio, decoded_rate = sf.read(
 # convert back to 48 kHz for speaker playback
 playback_rate = 48000
 
-num_samples = int(
-    len(decoded_audio)
-    * playback_rate
-    / decoded_rate
-)
-
-decoded_playback = resample(
+decoded_playback = resample_poly(
     decoded_audio,
-    num_samples
+    playback_rate,
+    decoded_rate
 )
 
-decoded_playback = decoded_playback.astype(np.int16)
+
+decoded_playback = resample_poly(decoded_audio, playback_rate, decoded_rate)
+decoded_playback = np.clip(decoded_playback, -32768, 32767).astype(np.int16)
 
 sd.play(
     decoded_playback,
@@ -173,3 +168,4 @@ print("\nCreated:")
 print(original_file)
 print(codec_file)
 print(decoded_file)
+
