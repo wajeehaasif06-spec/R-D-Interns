@@ -1,14 +1,10 @@
-# Virtual environment
+# Python
 venv/
-
-# Python cache
 __pycache__/
 *.pyc
 
-# Ignore raw codec files
-codec/*.raw
-codec/*.c2
+# VS Code
+.vscode/
 
-# Ignore local test audio if desired
-loud.wav
-noisy__Audio.wav
+# System
+.DS_Store

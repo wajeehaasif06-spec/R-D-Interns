@@ -3,7 +3,9 @@ import soundfile as sf
 import numpy as np
 from scipy.signal import resample
 from pathlib import Path
+import subprocess
 import os
+
 
 # ==================================================
 # PATHS
@@ -105,15 +107,69 @@ print(
 )
 
 # ==================================================
-# PLAYBACK
+# RUN CODEC2 IN WSL
 # ==================================================
-print("\nPlaying recording...")
+print("\nLaunching Codec2 processing...")
 
-sd.play(audio, INPUT_RATE)
+subprocess.run(
+    [
+        "wsl",
+        "bash",
+        "-c",
+        "cd ~/R-D-Interns && source venv/bin/activate && python phase2_codec.py"
+    ],
+    check=True
+)
+
+print("Codec2 processing complete!")
+
+# ==================================================
+# PLAY DECODED AUDIO
+# ==================================================
+decoded_file = (
+    r"\\wsl.localhost\Ubuntu\home\aymen\R-D-Interns"
+    r"\recordings\decoded_realtime.wav"
+)
+
+print("\nPlaying decoded audio...")
+
+from scipy.signal import resample
+
+decoded_audio, decoded_rate = sf.read(
+    decoded_file,
+    dtype='int16'
+)
+
+# convert back to 48 kHz for speaker playback
+playback_rate = 48000
+
+num_samples = int(
+    len(decoded_audio)
+    * playback_rate
+    / decoded_rate
+)
+
+decoded_playback = resample(
+    decoded_audio,
+    num_samples
+)
+
+decoded_playback = decoded_playback.astype(np.int16)
+
+sd.play(
+    decoded_playback,
+    playback_rate
+)
+
+
 sd.wait()
 
-print("Done!")
+print("Decoded playback complete!")
 
+# ==================================================
+# SUMMARY
+# ==================================================
 print("\nCreated:")
 print(original_file)
 print(codec_file)
+print(decoded_file)
