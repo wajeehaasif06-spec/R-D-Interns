@@ -8,3 +8,8 @@ __pycache__/
 
 # System
 .DS_Store
+
+# Generated audio/analysis outputs (Phase 2 pipeline)
+recordings/
+analysis/
+codec/
