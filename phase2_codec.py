@@ -10,10 +10,6 @@ print("="*50)
 print("PHASE 2: BUFFERED REAL-TIME CODEC2")
 print("="*50)
 
-# =====================================================
-# PARAMETERS
-# =====================================================
-
 
 # =====================================================
 # PATHS
@@ -38,38 +34,38 @@ FRAME_DURATION = FRAME_SIZE/sample_rate
 print(f"Frame size: {FRAME_SIZE}")
 
 print("\nPreprocessing audio...")
-data = data.astype(np.float64)
+data = data.astype(np.int16)
 
 # remove DC offset
 data = data - np.mean(data)
 
-# bandpass filter
-low = 250/(sample_rate/2)
-high = 3200/(sample_rate/2)
+# # bandpass filter
+# low = 100/(sample_rate/2)
+# high = 3600/(sample_rate/2)
+# FILTER_ORDER = 2 
 
-FILTER_ORDER = 2 
+# b, a = butter(
+#     FILTER_ORDER,
+#     [low, high],
+#     btype='band'
+# )
 
-b, a = butter(
-    FILTER_ORDER,
-    [low, high],
-    btype='band'
-)
-
-data = lfilter(
-    b,
-    a,
-    data
-)
+# data = lfilter(
+#     b,
+#     a,
+#     data
+# )
 
 # normalize
-peak = np.percentile(np.abs(data), 99)
-if peak > 0:
-    data = data / peak
+peak = np.max(np.abs(data))
 
-GAIN = 0.65
+if peak > 0:
+  data = data / peak
+
+GAIN = 0.85
 
 data = data * GAIN
-data = np.clip(data, -0.95, 0.95)
+data = np.clip(data, -1,1)
 data = (data * 32767).astype(np.int16)
 
 

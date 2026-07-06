@@ -45,6 +45,10 @@ sd.wait()
 
 print("Recording complete!")
 
+print("Max:", np.max(audio))
+print("Min:", np.min(audio))
+print("Mean:", np.mean(audio))
+
 # ==================================================
 # SAVE ORIGINAL AUDIO
 # ==================================================
@@ -147,8 +151,6 @@ decoded_playback = resample_poly(
     decoded_rate
 )
 
-
-decoded_playback = resample_poly(decoded_audio, playback_rate, decoded_rate)
 decoded_playback = np.clip(decoded_playback, -32768, 32767).astype(np.int16)
 
 sd.play(
