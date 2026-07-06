@@ -1,7 +1,7 @@
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
-from scipy.signal import resample_poly
+import soxr
 from pathlib import Path
 import subprocess
 import os
@@ -63,18 +63,17 @@ sf.write(
 print("Saved original recording")
 
 # ==================================================
-# CONVERT TO 8 kHz
+# CONVERT TO 8 kHz (using soxr)
 # ==================================================
 audio_float = audio.astype(np.float32)
 audio_float = audio_float.squeeze()
 
-
-audio_8k = resample_poly(
+audio_8k = soxr.resample(
     audio_float,
+    INPUT_RATE,
     CODEC_RATE,
-    INPUT_RATE
+    quality='HQ'
 )
-
 
 audio_8k = np.clip(
     audio_8k,
@@ -135,20 +134,21 @@ decoded_file = (
 
 print("\nPlaying decoded audio...")
 
-from scipy.signal import resample
-
 decoded_audio, decoded_rate = sf.read(
     decoded_file,
     dtype='int16'
 )
 
-# convert back to 48 kHz for speaker playback
+# convert back to 48 kHz for speaker playback (using soxr)
 playback_rate = 48000
 
-decoded_playback = resample_poly(
-    decoded_audio,
+decoded_audio_float = decoded_audio.astype(np.float32)
+
+decoded_playback = soxr.resample(
+    decoded_audio_float,
+    decoded_rate,
     playback_rate,
-    decoded_rate
+    quality='HQ'
 )
 
 decoded_playback = np.clip(decoded_playback, -32768, 32767).astype(np.int16)
@@ -157,7 +157,6 @@ sd.play(
     decoded_playback,
     playback_rate
 )
-
 
 sd.wait()
 
@@ -170,4 +169,3 @@ print("\nCreated:")
 print(original_file)
 print(codec_file)
 print(decoded_file)
-
